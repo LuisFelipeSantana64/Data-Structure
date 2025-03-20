@@ -1,0 +1,304 @@
+//Icaro Mikos de Souza
+//Luis Felipe Santana
+
+#include <stdio.h>
+#include <stdlib.h>
+
+
+struct no
+{
+
+    struct no *dir;
+    struct no *esq;
+    int dado, bal;
+
+};
+
+struct no *cria_no (int chave){
+
+    struct no *aux;
+
+    aux = (struct no *)malloc(sizeof (struct no));
+
+    aux->dado = chave;
+    aux->dir = NULL;
+    aux->esq = NULL;
+    aux->bal = 0;
+
+    return aux;
+
+};
+
+void direita(struct no *temp ){
+
+    struct no *aux, *aux2 = temp->esq;
+
+    aux = temp->dir;
+    aux2->dir = temp;
+    temp->esq = aux;
+    temp = aux2;
+
+
+}
+
+void esquerda(struct no *temp){
+
+    struct no *aux, *aux2 = temp->dir;
+
+    aux = temp->esq;
+    aux2->esq = temp;
+    temp->dir = aux;
+    temp = aux2;
+}
+
+struct no *raiz = NULL;
+
+void insere(int chave)
+{
+
+    struct no *pp = NULL, *p = raiz, *q, *filho, *pai = NULL, *trocado = raiz;
+
+    int imbal;
+
+    if(p == NULL)
+    {
+        raiz = cria_no(chave);
+        return;
+    }
+    
+
+    /* Insere chave e descobre ancestral mais jovem a ser desbalanceado */
+
+    while(p!=NULL)
+    {
+
+        if(chave < p->dado)
+        {
+            q = p->esq;
+        }
+        else
+        {
+            q = p->dir;
+        }
+        if(q!= NULL)
+        {
+            if(q->bal != 0)
+            {
+                pai = p;
+                trocado = q;
+            }
+        }
+        pp = p;
+        p = q;
+    }
+
+    q = cria_no(chave);
+    
+
+    if(chave < pp->dado)
+    {
+        pp->esq = q;
+    }
+    else
+    {
+        pp->dir = q;
+    }
+    
+
+    /* Balanceamento de todos os nos entre trocado e q devem ser ajustados */
+
+    if(chave < trocado->dado)
+    {
+        filho = trocado->esq;
+    }
+    else
+    {
+        filho = trocado->dir;
+    }
+    p = filho;
+    
+
+    while(p!=q)
+    {
+        if(chave < p->dado)
+        {
+            p->bal = 1;
+            p = p->esq;
+        }
+        else
+        {
+            p->bal = -1;
+            p = p->dir;
+        }
+    }
+    //printf("\n\naaaaaaaaaaaaaa");
+
+    if(chave < trocado->dado)
+    {
+        imbal = 1;
+    }
+    else
+    {
+        imbal = -1;
+    }
+
+    if(trocado->bal == 0)  //nao houve desbalanceamento
+    {
+        trocado->bal = imbal;
+        return;
+    }
+
+    if(trocado->bal != imbal)  // nao houve desbalanceamento
+    {
+        trocado->bal = 0;
+        return;
+    }
+
+    //printf("aaaaaaaaaaaaaa");
+     if(filho->bal== imbal){
+        p = filho;
+        if(imbal==1)
+            direita(trocado);
+        else esquerda(trocado);
+        trocado->bal = 0;
+        filho->bal = 0;
+     }
+     
+     else {
+        //printf("aaaaaaaaaaaaaa");
+        if (imbal == 1){
+            p = filho->dir;
+            esquerda(filho);
+            trocado->esq = p;
+            direita(trocado);
+        }
+        else{
+            p = filho->esq;
+            direita(filho);
+            trocado->dir = p;
+            esquerda(trocado);
+        }
+        if(p->bal == 0){
+            trocado->bal = imbal;
+            filho->bal = 0;
+        } else {
+            if(p->bal == imbal){
+                trocado->bal= -imbal;
+                filho->bal = 0;
+            }else{
+                trocado->bal = 0;
+                filho->bal = imbal;
+            }
+        }
+        p->bal = 0;
+     }
+    if(pai == NULL){
+        raiz = p;
+    }
+
+    else if(trocado == pai->dir){
+        pai->dir = p;
+    }
+
+    else pai->esq = p;
+    return;
+}
+
+
+int busca(int chave){
+
+    struct no *aux = raiz;
+
+    if(raiz == NULL){
+
+        printf("\nArvore avl vazia!");
+        return 0;
+    }
+
+    while(aux != NULL){
+
+        if(chave > aux->dado){
+            aux = aux->dir;
+        }
+        else if(chave < aux->dado){
+            aux = aux->esq;
+        }
+        else {
+            printf("\n%d Encontrado!",chave);
+            return 1;
+        }
+
+    }
+
+    printf("\nNao encontrado!");
+    return 0;
+
+}
+
+void em_ordem(struct no *aux){
+
+
+    if(aux == NULL){
+
+        return;
+    }
+
+    em_ordem(aux->esq);
+    printf("\n%d ",aux->dado);
+    em_ordem(aux->dir);
+    
+}
+
+void pre_ordem(struct no *aux){
+
+
+    if(aux == NULL){
+
+        return;
+    }
+
+    printf("\n%d ",aux->dado);
+    pre_ordem(aux->esq);
+    pre_ordem(aux->dir);
+    
+}
+
+void pos_ordem(struct no *aux){
+
+
+    if(aux == NULL){
+
+        return;
+    }
+
+    pos_ordem(aux->esq);
+    pos_ordem(aux->dir);
+    printf("\n%d ",aux->dado);
+    
+}
+
+
+
+
+int main()
+{
+
+    insere(13);
+    insere(12);
+    insere(11);
+    insere(10);
+    insere(14);
+
+    pre_ordem(raiz);
+
+    printf("\n\n");
+    
+    em_ordem(raiz);
+    printf("\n\n");
+
+    pos_ordem(raiz);
+    
+
+
+    return 0;
+}

@@ -78,7 +78,7 @@ void imprimir () //Imprime a fila
 
 }
 
-void main()
+int main()
 {
 
     removeFila();
